@@ -26,43 +26,45 @@ func (m *GoMachine) Execute(i Instruction) {
 	// fmt.Println("Condition Register:", m.cond)
 	switch i.operation {
 	case OpMovConst:
-		m.Mov(i.dest, i.operand)
+		m.Mov(i.arguments[0], i.arguments[1])
 	case OpMovRegister:
-		m.Mov(i.dest, m.registerFile[i.operand])
+		m.Mov(i.arguments[0], m.registerFile[i.arguments[1]])
 	case OpAddConst:
-		m.Add(i.dest, i.source, i.operand)
+		m.Add(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAddRegister:
-		m.Add(i.dest, i.source, m.registerFile[i.operand])
+		m.Add(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	case OpCmpConst:
-		m.Cmp(i.dest, i.operand)
+		m.Cmp(i.arguments[0], i.arguments[1])
 	case OpJmp:
-		m.Jump(int(i.dest))
+		m.Jump(int(i.arguments[0]))
 	case OpJmpNe:
 		if m.cond != 0 {
-			m.Jump(int(i.dest))
+			m.Jump(int(i.arguments[0]))
 		}
 	case OpJmpLt:
 		if m.cond < 0 {
-			m.Jump(int(i.dest))
+			m.Jump(int(i.arguments[0]))
 		}
 	case OpJmpGt:
 		if m.cond > 0 {
-			m.Jump(int(i.dest))
+			m.Jump(int(i.arguments[0]))
 		}
 	case OpAndConst:
-		m.And(i.dest, i.source, i.operand)
+		m.And(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAndRegister:
-		m.And(i.dest, i.source, m.registerFile[i.operand])
+		m.And(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	case OpOrConst:
-		m.Or(i.dest, i.source, i.operand)
+		m.Or(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpOrRegister:
-		m.Or(i.dest, i.source, m.registerFile[i.operand])
+		m.Or(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+	case OpNotConst:
+		m.Not(i.arguments[0], i.arguments[1])
 	case OpNotRegister:
-		m.Not(int(i.dest))
+		m.Not(i.arguments[0], m.registerFile[i.arguments[1]])
 	case OpXorConst:
-		m.Xor(i.dest, i.source, i.operand)
+		m.Xor(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpXorRegister:
-		m.Xor(i.dest, i.source, m.registerFile[i.operand])
+		m.Xor(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	}
 }
 
@@ -90,8 +92,8 @@ func (m *GoMachine) Or(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] | value
 }
 
-func (m *GoMachine) Not(dest int) {
-	m.registerFile[dest] = ^m.registerFile[dest]
+func (m *GoMachine) Not(dest, value uint64) {
+	m.registerFile[dest] = ^value
 }
 
 func (m *GoMachine) Xor(dest, src, value uint64) {

@@ -14,24 +14,17 @@ const (
 	OpAndRegister
 	OpOrConst
 	OpOrRegister
+	OpNotConst
 	OpNotRegister
 	OpXorConst
 	OpXorRegister
 )
 
 type Instruction struct {
-	operation             int
-	source, dest, operand uint64
+	operation int
+	arguments []uint64
 }
 
-func NewLiteralInstruction(operation int, dest uint64) *Instruction {
-	return &Instruction{operation: operation, source: 0, dest: dest, operand: 0}
-}
-
-func NewImmediateInstruction(operation int, dest, operand uint64) *Instruction {
-	return &Instruction{operation: operation, source: 0, dest: dest, operand: operand}
-}
-
-func NewDataInstruction(operation int, dest, source, operand uint64) *Instruction {
-	return &Instruction{operation: operation, source: source, dest: dest, operand: operand}
+func NewInstruction(operation int, arguments ...uint64) *Instruction {
+	return &Instruction{operation: operation, arguments: arguments}
 }

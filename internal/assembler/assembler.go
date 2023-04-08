@@ -10,15 +10,42 @@ import (
 	m "github.com/petabite/gomachine/internal/machine"
 )
 
+type OperationKey struct {
+	operation         string
+	registerOperation bool
+}
+
+var operationMap = map[OperationKey]int{
+	{"mov", false}: m.OpMovConst,
+	{"mov", true}:  m.OpMovRegister,
+	{"add", false}: m.OpAddConst,
+	{"add", true}:  m.OpAddRegister,
+	{"cmp", false}: m.OpCmpConst,
+	{"j", false}:   m.OpJmp,
+	{"jne", false}: m.OpJmpNe,
+	{"jlt", false}: m.OpJmpLt,
+	{"jgt", false}: m.OpJmpGt,
+	{"and", false}: m.OpAndConst,
+	{"and", true}:  m.OpAndRegister,
+	{"or", false}:  m.OpOrConst,
+	{"or", true}:   m.OpOrRegister,
+	{"not", false}: m.OpNotConst,
+	{"not", true}:  m.OpNotRegister,
+	{"xor", false}: m.OpXorConst,
+	{"xor", true}:  m.OpXorRegister,
+}
+
 func Assemble(file string) ([]m.Instruction, error) {
-	subroutine := []m.Instruction{}
+	// in: assembly
 	lines, err := readFileLines(file)
 	if err != nil {
 		return nil, err
 	}
 
+	// assembly line to assemble the assembly
+	subroutine := []m.Instruction{}
 	for _, line := range lines {
-		tokens, err := tokenizeLine(line)
+		tokens := tokenizeLine(line)
 		if err != nil {
 			return nil, errors.New("Error tokenizing file: " + err.Error())
 		}
@@ -29,52 +56,44 @@ func Assemble(file string) ([]m.Instruction, error) {
 		subroutine = append(subroutine, instruction)
 	}
 
+	// out: "machine code"
 	return subroutine, nil
 }
 
 func tokensToInstruction(t Tokens) (m.Instruction, error) {
-	var instruction m.Instruction
-	var err error
-	switch t.operation {
-	case "mov":
-		operation := m.OpMovConst
-		if t.hasRegisterOperand {
-			operation = m.OpMovRegister
-		}
-		instruction = *m.NewImmediateInstruction(operation, t.arguments[0], t.arguments[1])
-	case "add":
-		operation := m.OpAddConst
-		if t.hasRegisterOperand {
-			operation = m.OpAddRegister
-		}
-		instruction = *m.NewDataInstruction(operation, t.arguments[0], t.arguments[1], t.arguments[2])
-	default:
-		err = errors.New("Invalid instruction: " + t.operation)
-	}
+	operationKey := OperationKey{}
+	var arguments []uint64
 
-	return instruction, err
-}
-
-func tokenizeLine(line string) (Tokens, error) {
-	stringTokens := strings.Split(strings.ToLower(line), " ")
 	// parse operation
-	tokens := Tokens{operation: stringTokens[0]}
+	operationKey.operation = t.keyword
+
 	// parse arguments
-	for index, stringArg := range stringTokens[1:] {
+	for index, stringArg := range t.arguments {
 		if strings.HasPrefix(stringArg, "r") {
-			if index == len(stringTokens)-1 {
-				tokens.hasRegisterOperand = true
+			if index == len(t.arguments)-1 {
+				operationKey.registerOperation = true
 			}
 			// strip the 'r' prefix
 			stringArg = stringArg[1:]
 		}
 		arg, err := strconv.ParseUint(stringArg, 10, 64)
 		if err != nil {
-			return Tokens{}, err
+			return m.Instruction{}, err
 		}
-		tokens.arguments = append(tokens.arguments, arg)
+		arguments = append(arguments, arg)
 	}
-	return tokens, nil
+
+	operation, exists := operationMap[operationKey]
+	if !exists {
+		return m.Instruction{}, errors.New("Invalid instruction: " + t.keyword)
+	}
+
+	return *m.NewInstruction(operation, arguments...), nil
+}
+
+func tokenizeLine(line string) Tokens {
+	stringTokens := strings.Split(strings.ToLower(line), " ")
+	return Tokens{keyword: stringTokens[0], arguments: stringTokens[1:]}
 }
 
 func readFileLines(path string) ([]string, error) {
