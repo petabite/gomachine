@@ -8,11 +8,13 @@ const (
 	OpCmpConst
 	OpJmp
 	OpJmpNe
-	// OpAnd
-	// OpOr
-	// OpNot
-	// OpJz
-	// OpNop
+	OpAndConst
+	OpAndRegister
+	OpOrConst
+	OpOrRegister
+	OpNotRegister
+	OpXorConst
+	OpXorRegister
 )
 
 type Instruction struct {
@@ -22,7 +24,7 @@ type Instruction struct {
 	operand   uint64
 }
 
-func NewJumpInstruction(operation int, dest uint64) *Instruction {
+func NewLiteralInstruction(operation int, dest uint64) *Instruction {
 	return &Instruction{operation: operation, source: 0, dest: dest, operand: 0}
 }
 
