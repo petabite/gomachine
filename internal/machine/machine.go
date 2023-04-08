@@ -26,9 +26,9 @@ func (m *GoMachine) Execute(i Instruction) {
 	// fmt.Println("Condition Register:", m.cond)
 	switch i.operation {
 	case OpMovConst:
-		m.Mov(i.arguments[0], i.arguments[1])
+		m.Move(i.arguments[0], i.arguments[1])
 	case OpMovRegister:
-		m.Mov(i.arguments[0], m.registerFile[i.arguments[1]])
+		m.Move(i.arguments[0], m.registerFile[i.arguments[1]])
 	case OpAddConst:
 		m.Add(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAddRegister:
@@ -38,7 +38,7 @@ func (m *GoMachine) Execute(i Instruction) {
 	case OpIncRegister:
 		m.Add(i.arguments[0], i.arguments[0], 1)
 	case OpCmpConst:
-		m.Cmp(i.arguments[0], i.arguments[1])
+		m.Compare(i.arguments[0], i.arguments[1])
 	case OpJmp:
 		m.Jump(int(i.arguments[0]))
 	case OpJmpNe:
@@ -72,7 +72,7 @@ func (m *GoMachine) Execute(i Instruction) {
 	}
 }
 
-func (m *GoMachine) Mov(dest, value uint64) {
+func (m *GoMachine) Move(dest, value uint64) {
 	m.registerFile[dest] = value
 }
 
@@ -80,7 +80,7 @@ func (m *GoMachine) Add(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] + value
 }
 
-func (m *GoMachine) Cmp(dest, value uint64) {
+func (m *GoMachine) Compare(dest, value uint64) {
 	m.cond = int64(m.registerFile[dest] - value)
 }
 
