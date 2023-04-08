@@ -8,6 +8,8 @@ const (
 	OpCmpConst
 	OpJmp
 	OpJmpNe
+	OpJmpLt
+	OpJmpGt
 	OpAndConst
 	OpAndRegister
 	OpOrConst

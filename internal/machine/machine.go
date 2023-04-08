@@ -41,6 +41,14 @@ func (m *GoMachine) Execute(i Instruction) {
 		if m.cond != 0 {
 			m.Jump(int(i.dest))
 		}
+	case OpJmpLt:
+		if m.cond < 0 {
+			m.Jump(int(i.dest))
+		}
+	case OpJmpGt:
+		if m.cond > 0 {
+			m.Jump(int(i.dest))
+		}
 	case OpAndConst:
 		m.And(i.dest, i.source, i.operand)
 	case OpAndRegister:
