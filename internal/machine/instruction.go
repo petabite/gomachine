@@ -20,10 +20,8 @@ const (
 )
 
 type Instruction struct {
-	operation int
-	source    uint64
-	dest      uint64
-	operand   uint64
+	operation             int
+	source, dest, operand uint64
 }
 
 func NewLiteralInstruction(operation int, dest uint64) *Instruction {
