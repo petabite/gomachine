@@ -10,11 +10,6 @@ import (
 	m "github.com/petabite/gomachine/internal/machine"
 )
 
-type OperationKey struct {
-	operation         string
-	registerOperation bool
-}
-
 var operationMap = map[OperationKey]int{
 	{"mov", false}: m.OpMovConst,
 	{"mov", true}:  m.OpMovRegister,
@@ -37,30 +32,36 @@ var operationMap = map[OperationKey]int{
 
 func Assemble(file string) ([]m.Instruction, error) {
 	// in: assembly
-	lines, err := readFileLines(file)
-	if err != nil {
-		return nil, err
-	}
+	asm := Assembly{source: file}
 
 	// assembly line to assemble the assembly
-	subroutine := []m.Instruction{}
-	for _, line := range lines {
-		tokens := tokenizeLine(line)
-		if err != nil {
-			return nil, errors.New("Error tokenizing file: " + err.Error())
-		}
-		instruction, err := tokensToInstruction(tokens)
-		if err != nil {
-			return nil, errors.New("Error converting tokens to instruction: " + err.Error())
-		}
-		subroutine = append(subroutine, instruction)
+	var err error
+	err = asm.tokenizeFile()
+	if err != nil {
+		return nil, errors.New("Error tokenizing file: " + err.Error())
+	}
+
+	err = asm.assembleSubroutine()
+	if err != nil {
+		return nil, errors.New("Error during assembly: " + err.Error())
 	}
 
 	// out: "machine code"
-	return subroutine, nil
+	return asm.subroutine, nil
 }
 
-func tokensToInstruction(t Tokens) (m.Instruction, error) {
+func (a *Assembly) assembleSubroutine() error {
+	for _, line := range a.sourceTokens {
+		instruction, err := a.tokensToInstruction(line)
+		if err != nil {
+			return err
+		}
+		a.subroutine = append(a.subroutine, instruction)
+	}
+	return nil
+}
+
+func (a *Assembly) tokensToInstruction(t Tokens) (m.Instruction, error) {
 	operationKey := OperationKey{}
 	var arguments []uint64
 
@@ -91,15 +92,10 @@ func tokensToInstruction(t Tokens) (m.Instruction, error) {
 	return *m.NewInstruction(operation, arguments...), nil
 }
 
-func tokenizeLine(line string) Tokens {
-	stringTokens := strings.Split(strings.ToLower(line), " ")
-	return Tokens{keyword: stringTokens[0], arguments: stringTokens[1:]}
-}
-
-func readFileLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+func (a *Assembly) tokenizeFile() error {
+	file, err := os.Open(a.source)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer file.Close()
 
@@ -112,8 +108,17 @@ func readFileLines(path string) ([]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return lines, nil
+	for _, line := range lines {
+		a.sourceTokens = append(a.sourceTokens, tokenizeLine(line))
+	}
+
+	return nil
+}
+
+func tokenizeLine(line string) Tokens {
+	stringTokens := strings.Split(strings.ToLower(line), " ")
+	return Tokens{keyword: stringTokens[0], arguments: stringTokens[1:]}
 }
