@@ -7,7 +7,7 @@ import (
 
 func main() {
 	machine := m.NewGoMachine()
-	subroutine, err := asm.Assemble("examples/add.gm")
+	subroutine, err := asm.Assemble("examples/loop.gm")
 	if err != nil {
 		panic(err)
 	}
