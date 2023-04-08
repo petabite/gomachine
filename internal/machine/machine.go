@@ -33,6 +33,10 @@ func (m *GoMachine) Execute(i Instruction) {
 		m.Add(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAddRegister:
 		m.Add(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+	case OpDecRegister:
+		m.Add(i.arguments[0], i.arguments[0], ^uint64(0))
+	case OpIncRegister:
+		m.Add(i.arguments[0], i.arguments[0], 1)
 	case OpCmpConst:
 		m.Cmp(i.arguments[0], i.arguments[1])
 	case OpJmp:

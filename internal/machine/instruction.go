@@ -5,6 +5,8 @@ const (
 	OpMovRegister
 	OpAddConst
 	OpAddRegister
+	OpDecRegister
+	OpIncRegister
 	OpCmpConst
 	OpJmp
 	OpJmpNe

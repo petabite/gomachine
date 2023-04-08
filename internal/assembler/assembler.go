@@ -15,6 +15,8 @@ var operationMap = map[OperationKey]int{
 	{"mov", true}:  m.OpMovRegister,
 	{"add", false}: m.OpAddConst,
 	{"add", true}:  m.OpAddRegister,
+	{"dec", true}:  m.OpDecRegister,
+	{"inc", true}:  m.OpIncRegister,
 	{"cmp", false}: m.OpCmpConst,
 	{"j", false}:   m.OpJmp,
 	{"jne", false}: m.OpJmpNe,
