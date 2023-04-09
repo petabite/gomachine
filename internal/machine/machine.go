@@ -45,6 +45,10 @@ func (m *GoMachine) Execute(i Instruction) {
 		if m.cond != 0 {
 			m.Jump(int(i.arguments[0]))
 		}
+	case OpJmpEq:
+		if m.cond == 0 {
+			m.Jump(int(i.arguments[0]))
+		}
 	case OpJmpLt:
 		if m.cond < 0 {
 			m.Jump(int(i.arguments[0]))

@@ -10,6 +10,7 @@ const (
 	OpCmpConst
 	OpJmp
 	OpJmpNe
+	OpJmpEq
 	OpJmpLt
 	OpJmpGt
 	OpAndConst

@@ -21,6 +21,7 @@ var operationMap = map[OperationKey]int{
 	{"cmp", false}: m.OpCmpConst,
 	{"j", false}:   m.OpJmp,
 	{"jne", false}: m.OpJmpNe,
+	{"jeq", false}: m.OpJmpEq,
 	{"jlt", false}: m.OpJmpLt,
 	{"jgt", false}: m.OpJmpGt,
 	{"and", false}: m.OpAndConst,
