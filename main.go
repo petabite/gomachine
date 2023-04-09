@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	asm "github.com/petabite/gomachine/internal/assembler"
-	m "github.com/petabite/gomachine/internal/machine"
+	"github.com/petabite/gomachine/internal/assembler"
+	"github.com/petabite/gomachine/internal/machine"
 )
 
 func main() {
@@ -15,8 +15,7 @@ func main() {
 		return
 	}
 	source := args[1]
-	machine := m.NewGoMachine()
-	subroutine, err := asm.Assemble(source)
+	subroutine, err := assembler.Assemble(source)
 	if err != nil {
 		panic(err)
 	}

@@ -2,108 +2,105 @@ package machine
 
 import "fmt"
 
-func NewGoMachine() *GoMachine {
-	return &GoMachine{}
-}
-
 type GoMachine struct {
 	registerFile [10]uint64
 	pc           int
 	cond         int64
 }
 
-func (m *GoMachine) Run(subroutine []Instruction) {
-	for m.pc < len(subroutine) {
-		m.Execute(subroutine[m.pc])
-		m.pc++
+func Run(subroutine []Instruction) {
+	machine := &GoMachine{}
+	for machine.pc < len(subroutine) {
+		machine.execute(subroutine[machine.pc])
+		machine.pc++
 	}
-	fmt.Println(m.registerFile[0])
+	fmt.Println(machine.registerFile[0])
 }
 
-func (m *GoMachine) Execute(i Instruction) {
+func (m *GoMachine) execute(i Instruction) {
 	// fmt.Println("PC:", m.pc)
 	// fmt.Println("Register File:", m.registerFile)
 	// fmt.Println("Condition Register:", m.cond)
 	switch i.operation {
 	case OpMovConst:
-		m.Move(i.arguments[0], i.arguments[1])
+		m.move(i.arguments[0], i.arguments[1])
 	case OpMovRegister:
-		m.Move(i.arguments[0], m.registerFile[i.arguments[1]])
+		m.move(i.arguments[0], m.registerFile[i.arguments[1]])
 	case OpAddConst:
-		m.Add(i.arguments[0], i.arguments[1], i.arguments[2])
+		m.add(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAddRegister:
-		m.Add(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+		m.add(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	case OpDecRegister:
-		m.Add(i.arguments[0], i.arguments[0], ^uint64(0))
+		m.add(i.arguments[0], i.arguments[0], ^uint64(0))
 	case OpIncRegister:
-		m.Add(i.arguments[0], i.arguments[0], 1)
+		m.add(i.arguments[0], i.arguments[0], 1)
 	case OpCmpConst:
-		m.Compare(i.arguments[0], i.arguments[1])
+		m.compare(i.arguments[0], i.arguments[1])
 	case OpJmp:
-		m.Jump(int(i.arguments[0]))
+		m.jump(int(i.arguments[0]))
 	case OpJmpNe:
 		if m.cond != 0 {
-			m.Jump(int(i.arguments[0]))
+			m.jump(int(i.arguments[0]))
 		}
 	case OpJmpEq:
 		if m.cond == 0 {
-			m.Jump(int(i.arguments[0]))
+			m.jump(int(i.arguments[0]))
 		}
 	case OpJmpLt:
 		if m.cond < 0 {
-			m.Jump(int(i.arguments[0]))
+			m.jump(int(i.arguments[0]))
 		}
 	case OpJmpGt:
 		if m.cond > 0 {
-			m.Jump(int(i.arguments[0]))
+			m.jump(int(i.arguments[0]))
 		}
 	case OpAndConst:
-		m.And(i.arguments[0], i.arguments[1], i.arguments[2])
+		m.and(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpAndRegister:
-		m.And(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+		m.and(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	case OpOrConst:
-		m.Or(i.arguments[0], i.arguments[1], i.arguments[2])
+		m.or(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpOrRegister:
-		m.Or(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+		m.or(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	case OpNotConst:
-		m.Not(i.arguments[0], i.arguments[1])
+		m.not(i.arguments[0], i.arguments[1])
 	case OpNotRegister:
-		m.Not(i.arguments[0], m.registerFile[i.arguments[1]])
+		m.not(i.arguments[0], m.registerFile[i.arguments[1]])
 	case OpXorConst:
-		m.Xor(i.arguments[0], i.arguments[1], i.arguments[2])
+		m.xor(i.arguments[0], i.arguments[1], i.arguments[2])
 	case OpXorRegister:
-		m.Xor(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
+		m.xor(i.arguments[0], i.arguments[1], m.registerFile[i.arguments[2]])
 	}
 }
 
-func (m *GoMachine) Move(dest, value uint64) {
+func (m *GoMachine) move(dest, value uint64) {
 	m.registerFile[dest] = value
 }
 
-func (m *GoMachine) Add(dest, src, value uint64) {
+func (m *GoMachine) add(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] + value
 }
 
-func (m *GoMachine) Compare(dest, value uint64) {
+func (m *GoMachine) compare(dest, value uint64) {
 	m.cond = int64(m.registerFile[dest] - value)
 }
 
-func (m *GoMachine) Jump(dest int) {
+func (m *GoMachine) jump(dest int) {
 	m.pc = dest - 1
 }
 
-func (m *GoMachine) And(dest, src, value uint64) {
+func (m *GoMachine) and(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] & value
 }
 
-func (m *GoMachine) Or(dest, src, value uint64) {
+func (m *GoMachine) or(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] | value
 }
 
-func (m *GoMachine) Not(dest, value uint64) {
+func (m *GoMachine) not(dest, value uint64) {
 	m.registerFile[dest] = ^value
 }
 
-func (m *GoMachine) Xor(dest, src, value uint64) {
+func (m *GoMachine) xor(dest, src, value uint64) {
 	m.registerFile[dest] = m.registerFile[src] ^ value
 }
