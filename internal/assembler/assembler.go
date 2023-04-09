@@ -61,7 +61,7 @@ func (a *Assembly) extractLabels() {
 			a.tokensToLabel(tokens)
 		} else {
 			// regular instruction
-			a.instructionCount++
+			a.staticInstructions++
 		}
 	}
 }
@@ -81,7 +81,7 @@ func (a *Assembly) assembleSubroutine() error {
 
 func (a *Assembly) tokensToLabel(t Tokens) {
 	label := t.keyword[:len(t.keyword)-1]
-	a.labels[label] = a.instructionCount
+	a.labels[label] = a.staticInstructions
 }
 
 func (a *Assembly) tokensToInstruction(t Tokens) (m.Instruction, error) {

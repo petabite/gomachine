@@ -3,15 +3,17 @@ package machine
 import "fmt"
 
 type GoMachine struct {
-	registerFile [10]uint64
-	pc           int
-	cond         int64
+	registerFile        [10]uint64
+	pc                  int
+	cond                int64
+	dynamicInstructions uint64
 }
 
 func Run(subroutine []Instruction) {
 	machine := &GoMachine{}
 	for machine.pc < len(subroutine) {
 		machine.execute(subroutine[machine.pc])
+		machine.dynamicInstructions++
 		machine.pc++
 	}
 	fmt.Println(machine.registerFile[0])

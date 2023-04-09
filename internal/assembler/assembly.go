@@ -5,11 +5,11 @@ import (
 )
 
 type Assembly struct {
-	source           string
-	sourceTokens     []Tokens
-	labels           map[string]int
-	subroutine       []m.Instruction
-	instructionCount int
+	source             string
+	sourceTokens       []Tokens
+	labels             map[string]int
+	subroutine         []m.Instruction
+	staticInstructions int
 }
 
 type Tokens struct {
