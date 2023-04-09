@@ -43,7 +43,7 @@ func Assemble(file string) ([]m.Instruction, error) {
 	if err != nil {
 		return nil, errors.New("Error tokenizing file: " + err.Error())
 	}
-
+	asm.extractLabels()
 	err = asm.assembleSubroutine()
 	if err != nil {
 		return nil, errors.New("Error during assembly: " + err.Error())
@@ -53,18 +53,25 @@ func Assemble(file string) ([]m.Instruction, error) {
 	return asm.subroutine, nil
 }
 
-func (a *Assembly) assembleSubroutine() error {
+func (a *Assembly) extractLabels() {
 	for _, tokens := range a.sourceTokens {
 		if strings.HasSuffix(tokens.keyword, ":") {
 			// label
 			a.tokensToLabel(tokens)
 		} else {
-			// instruction
+			// regular instruction
+			a.instructionCount++
+		}
+	}
+}
+
+func (a *Assembly) assembleSubroutine() error {
+	for _, tokens := range a.sourceTokens {
+		if !strings.HasSuffix(tokens.keyword, ":") {
 			instruction, err := a.tokensToInstruction(tokens)
 			if err != nil {
 				return err
 			}
-			a.instructionCount++
 			a.subroutine = append(a.subroutine, instruction)
 		}
 	}
@@ -143,6 +150,8 @@ func (a *Assembly) tokenizeFile() error {
 }
 
 func tokenizeLine(line string) Tokens {
-	stringTokens := strings.Split(strings.ToLower(line), " ")
+	line = strings.TrimSpace(line)
+	line = strings.ToLower(line)
+	stringTokens := strings.Split(line, " ")
 	return Tokens{keyword: stringTokens[0], arguments: stringTokens[1:]}
 }
