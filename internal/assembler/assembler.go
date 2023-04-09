@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -35,7 +36,7 @@ var operationMap = map[OperationKey]int{
 func Assemble(file string) ([]m.Instruction, error) {
 	// in: assembly
 	asm := Assembly{source: file}
-
+	asm.labels = make(map[string]int)
 	// assembly line to assemble the assembly
 	var err error
 	err = asm.tokenizeFile()
@@ -53,32 +54,53 @@ func Assemble(file string) ([]m.Instruction, error) {
 }
 
 func (a *Assembly) assembleSubroutine() error {
-	for _, line := range a.sourceTokens {
-		instruction, err := a.tokensToInstruction(line)
-		if err != nil {
-			return err
+	for _, tokens := range a.sourceTokens {
+		if strings.HasSuffix(tokens.keyword, ":") {
+			// label
+			a.tokensToLabel(tokens)
+		} else {
+			// instruction
+			instruction, err := a.tokensToInstruction(tokens)
+			if err != nil {
+				return err
+			}
+			a.instructionCount++
+			a.subroutine = append(a.subroutine, instruction)
 		}
-		a.subroutine = append(a.subroutine, instruction)
 	}
 	return nil
 }
 
+func (a *Assembly) tokensToLabel(t Tokens) {
+	label := t.keyword[:len(t.keyword)-1]
+	a.labels[label] = a.instructionCount
+}
+
 func (a *Assembly) tokensToInstruction(t Tokens) (m.Instruction, error) {
 	operationKey := OperationKey{}
-	var arguments []uint64
 
 	// parse operation
 	operationKey.operation = t.keyword
 
 	// parse arguments
+	var arguments []uint64
+	registerRegex := regexp.MustCompile(`^r\d$`)
 	for index, stringArg := range t.arguments {
-		if strings.HasPrefix(stringArg, "r") {
+		// register argument
+		if registerRegex.MatchString(stringArg) {
 			if index == len(t.arguments)-1 {
 				operationKey.registerOperation = true
 			}
 			// strip the 'r' prefix
 			stringArg = stringArg[1:]
 		}
+
+		// label argument
+		labelLocation, exists := a.labels[stringArg]
+		if exists {
+			stringArg = strconv.Itoa(labelLocation)
+		}
+
 		arg, err := strconv.ParseUint(stringArg, 10, 64)
 		if err != nil {
 			return m.Instruction{}, err
