@@ -1,0 +1,10 @@
+MOV r1 5
+MOV r2 10 
+loop:
+CMP r1 1 
+JLT end
+ADD r3 r3 r2 
+DEC r1 
+J loop
+end:
+MOV r0 r3
